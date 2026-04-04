@@ -25,10 +25,6 @@ public class ArbolMulticamino<T> {
 
     }
 
-    public boolean estaVacio() {
-        return raiz == null;
-    }
-
     public void insertarRaiz(T dato) {
         if (raiz != null) {
             throw new IllegalStateException("La raiz ya existe");
