@@ -5,13 +5,18 @@ import java.util.LinkedList;
 
 public class ArbolMulticamino<T> {
 
-    private static class Nodo<T> {
+    protected static class Nodo<T> {
         T dato;
         List<Nodo<T>> hijos;
+        int altura = 0; 
 
         Nodo(T dato) {
             this.dato = dato;
             this.hijos = new ArrayList<>();
+            this.altura = 0;
+        }
+        public void  setAltura (int altura) {
+            this.altura = altura;
         }
 
         boolean esHoja() {
@@ -19,6 +24,7 @@ public class ArbolMulticamino<T> {
         }
     }
     private Nodo<T> raiz;
+    int maxHeight = 5;
 
     public ArbolMulticamino() {
         this.raiz = null;
@@ -30,6 +36,7 @@ public class ArbolMulticamino<T> {
             throw new IllegalStateException("La raiz ya existe");
         }
         raiz = new Nodo<>(dato);
+        raiz.altura = 1;
     }
 
     public boolean agregarHijo(T padre, T hijo) {
@@ -37,7 +44,13 @@ public class ArbolMulticamino<T> {
         if (nodoPadre == null) {
             return false;
         }
-        nodoPadre.hijos.add(new Nodo<>(hijo));
+        if (nodoPadre.altura >= maxHeight) {
+            return false;
+        }
+        Nodo<T> nuevoHijo = new Nodo<>(hijo);
+        nuevoHijo.setAltura(nodoPadre.altura + 1);
+        nodoPadre.hijos.add(nuevoHijo);
+
         return true;
     }
 

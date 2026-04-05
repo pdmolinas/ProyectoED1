@@ -3,7 +3,7 @@ import java.util.HashSet;
 import java.util.Stack;
 
 public class BST<T> {
-    public class Nodo<T> {
+    protected static class Nodo<T> {
         private T dato;
         private Nodo<T> left;
         private Nodo<T> right;
@@ -182,7 +182,7 @@ public class BST<T> {
         }
     }
 
-    private int altura() {
+    public int altura() {
         return altura(this.raiz);
     }
 
@@ -306,5 +306,7 @@ public class BST<T> {
         return valorActual + sumarNodos(nodo.left) + sumarNodos(nodo.right);
 
     }
+
+
 }
 
