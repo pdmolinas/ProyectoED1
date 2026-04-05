@@ -20,6 +20,7 @@ public class BST<T> {
     }
     private Nodo<T> raiz;
     private Comparator<T> comparador;
+    private int comparisons = 0;
 
     public BST(Comparator<T> comparador) {
         this.comparador = comparador;
@@ -38,10 +39,10 @@ public class BST<T> {
         if (nodo == null) {
             return new Nodo<>(valor);
         }
-        if (comparador.compare(valor, nodo.obtenerDato()) == 0) {
+        if (compare(valor, nodo.obtenerDato()) == 0) {
             return null;
         }
-        if (comparador.compare(valor, nodo.obtenerDato()) < 0) {
+        if (compare(valor, nodo.obtenerDato()) < 0) {
             nodo.left = insertar(valor, nodo.left);
             return nodo;
         }
@@ -55,19 +56,11 @@ public class BST<T> {
     private Nodo<T> buscar(Nodo<T> raiz, T valor) {
         if (raiz == null)
             return null;
-        if (comparador.compare(raiz.obtenerDato(), valor) == 0)
+        if (compare(raiz.obtenerDato(), valor) == 0)
             return raiz;
-        if (comparador.compare(raiz.obtenerDato(), valor) > 0)
+        if (compare(raiz.obtenerDato(), valor) > 0)
             return buscar(raiz.left, valor);
         return buscar(raiz.right, valor);
-    }
-
-    private Nodo<T> sucesorInOrder(Nodo<T> raiz) {
-        raiz = raiz.right;
-        while (raiz != null && raiz.left != null) {
-            raiz = raiz.left;
-        }
-        return raiz;
     }
 
     public Nodo<T> eliminar(T valor) {
@@ -84,7 +77,7 @@ public class BST<T> {
             return null;
         }
 
-        int comparacion = comparador.compare(valor, raiz.obtenerDato());
+        int comparacion = compare(valor, raiz.obtenerDato());
 
         if (comparacion < 0) {
             raiz.left = eliminar(raiz.left, valor);
@@ -306,6 +299,25 @@ public class BST<T> {
         return valorActual + sumarNodos(nodo.left) + sumarNodos(nodo.right);
 
     }
+    private Nodo<T> sucesorInOrder(Nodo<T> raiz) {
+        raiz = raiz.right;
+        while (raiz != null && raiz.left != null) {
+            raiz = raiz.left;
+        }
+        return raiz;
+    }
+    private int compare(T a, T b) {
+        comparisons++;
+        return comparador.compare(a, b);
+    }
+    public void clearMetrics() {
+        comparisons = 0;
+    }
+    public int getComparisons() {
+        return comparisons;
+    }
+
+
 
 
 }

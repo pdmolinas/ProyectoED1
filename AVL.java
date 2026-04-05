@@ -2,12 +2,14 @@ import java.util.Comparator;
 
 public class AVL<T> {
 
-    private final Comparator<T> comparator;
+    private final Comparator<T> comparador;
     private Node<T> root;
     private int size;
+    private int comparisons;
+    private int swaps;
 
     public AVL(Comparator<T> comparator) {
-        this.comparator = comparator;
+        this.comparador = comparator;
         this.root = null;
         this.size = 0;
     }
@@ -20,7 +22,7 @@ public class AVL<T> {
             this.size ++;
             return new Node<T>(value);
         }
-        int compare = comparator.compare(value, root.value);
+        int compare = compare(value, root.value);
         if (compare < 0) root.left = insert(root.left, value);
         else if (compare > 0) root.right = insert(root.right, value);
         else{
@@ -31,23 +33,23 @@ public class AVL<T> {
         int balance = getBalance(root);
 
         // Left heavy (LL case)
-        if (balance < -1 && comparator.compare(value, root.left.value) < 0) {
+        if (balance < -1 && compare(value, root.left.value) < 0) {
             return rotateRight(root);
         }
 
         // Left heavy (LR case)
-        if (balance < -1 && comparator.compare(value, root.left.value) > 0) {
+        if (balance < -1 && compare(value, root.left.value) > 0) {
             root.left = rotateLeft(root.left);
             return rotateRight(root);
         }
 
         // Right heavy (RR case)
-        if (balance > 1 && comparator.compare(value, root.right.value) > 0) {
+        if (balance > 1 && compare(value, root.right.value) > 0) {
             return rotateLeft(root);
         }
 
         // Right heavy (RL case)
-        if (balance > 1 && comparator.compare(value, root.right.value) < 0) {
+        if (balance > 1 && compare(value, root.right.value) < 0) {
             root.right = rotateRight(root.right);
             return rotateLeft(root);
         }
@@ -57,6 +59,7 @@ public class AVL<T> {
 
     private Node<T> rotateLeft(Node<T> root){
         if(root ==null) return null;
+        swaps++;
         if(root.right == null) return root;
 
         Node<T> newRoot = root.right;
@@ -71,6 +74,7 @@ public class AVL<T> {
     }
     private Node<T> rotateRight (Node<T> root){
         if(root ==null) return null;
+        swaps++;
         if(root.left == null) return root;
 
         Node<T> newRoot = root.left;
@@ -97,7 +101,7 @@ public class AVL<T> {
             return null;
         }
 
-        int compare = comparator.compare(value, root.value);
+        int compare = compare(value, root.value);
         if (compare < 0) {
             root.left = delete(root.left, value);
         } else if (compare > 0) {
@@ -152,7 +156,7 @@ public class AVL<T> {
         Node<T> current = this.root;
 
         while (current != null) {
-            int compare = comparator.compare(value, current.value);
+            int compare = compare(value, current.value);
             if (compare == 0) {
                 return current.value;
             }
@@ -179,6 +183,21 @@ public class AVL<T> {
        if (root == null) return 0;
         return root.height;
     }
+    public void clearMetrics() {
+        comparisons = 0;
+        swaps = 0;
+    }
+    public int getComparisons() {
+        return comparisons;
+    }
+    public int getSwaps() {
+        return swaps;
+    }
+    private int compare(T a, T b) {
+        comparisons++;
+        return comparador.compare(a, b);
+    }
+
 
     protected static class Node<T>{
         protected T value;
@@ -190,5 +209,5 @@ public class AVL<T> {
             this.value = value;
             this.height = 1;
         }
-            }
+    }
 }
