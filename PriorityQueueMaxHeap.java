@@ -60,6 +60,15 @@ public class PriorityQueueMaxHeap<T> {
         return max;
     }
 
+    public void changeComparator(Comparator<T> newComparator) {
+        if (newComparator == null) {
+            throw new IllegalArgumentException("Comparator cannot be null");
+        }
+
+        this.comparator = newComparator;
+        rebuildHeap();
+    }
+
     public int getSwaps() {
         return swaps;
     }
@@ -124,5 +133,11 @@ public class PriorityQueueMaxHeap<T> {
 
     private int rightChild(int index) {
         return 2 * index + 2;
+    }
+
+    private void rebuildHeap() {
+        for (int i = parent(heap.size() - 1); i >= 0; i--) {
+            heapifyDown(i);
+        }
     }
 }
