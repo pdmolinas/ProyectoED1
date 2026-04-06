@@ -1,8 +1,20 @@
+package org.example;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Stack;
 
-public class BST<T> {
+// Checklist para interfaz
+// boolean insert(T value);
+// boolean search(T value);
+// boolean delete(T value);
+// void inOrderTraversal();
+// void preOrderTraversal();
+// void postOrderTraversal();
+// void levelOrderTraversal();
+// int height();
+// void getMetrics();
+// void resetMetrics();
+public class BST<T> implements org.example.interfaces.SearchTree<T> {
     protected static class Nodo<T> {
         private T dato;
         private Nodo<T> left;
@@ -21,21 +33,23 @@ public class BST<T> {
     private Nodo<T> raiz;
     private Comparator<T> comparador;
     private int comparisons = 0;
+    private boolean deleted;
 
     public BST(Comparator<T> comparador) {
         this.comparador = comparador;
         this.raiz = null;
     }
 
-    public boolean insertar(T valor) {
+    @Override
+    public boolean insert(T valor) {
         if (this.raiz == null) {
             this.raiz = new Nodo<>(valor);
             return true;
         }
-        return insertar(valor, this.raiz) != null;
+        return insert(valor, this.raiz) != null;
 
     }
-    private Nodo<T> insertar(T valor, Nodo<T> nodo) {
+    private Nodo<T> insert(T valor, Nodo<T> nodo) {
         if (nodo == null) {
             return new Nodo<>(valor);
         }
@@ -43,68 +57,74 @@ public class BST<T> {
             return null;
         }
         if (compare(valor, nodo.obtenerDato()) < 0) {
-            nodo.left = insertar(valor, nodo.left);
+            nodo.left = insert(valor, nodo.left);
             return nodo;
         }
-        nodo.right = insertar(valor, nodo.right);
+        nodo.right = insert(valor, nodo.right);
         return nodo;
     }
-    public Nodo<T> buscar(T valor) {
-        return buscar(this.raiz, valor);
+    @Override
+    public boolean search(T valor) {
+        return search(this.raiz, valor);
     }
 
-    private Nodo<T> buscar(Nodo<T> raiz, T valor) {
+    private boolean search(Nodo<T> raiz, T valor) {
         if (raiz == null)
-            return null;
+            return false;
         if (compare(raiz.obtenerDato(), valor) == 0)
-            return raiz;
+            return true;
         if (compare(raiz.obtenerDato(), valor) > 0)
-            return buscar(raiz.left, valor);
-        return buscar(raiz.right, valor);
+            return search(raiz.left, valor);
+        return search(raiz.right, valor);
     }
 
-    public Nodo<T> eliminar(T valor) {
-        Nodo<T> eliminado = buscar(valor);
-        if (eliminado == null) {
-            return null;
+    @Override
+    public boolean delete(T valor) {
+        deleted = false;
+        if (!search(valor)) {
+            return false;
         }
-        this.raiz = eliminar(this.raiz, valor);
-        return eliminado;
+        this.raiz = delete(this.raiz, valor);
+        return deleted;
     }
 
-    private Nodo<T> eliminar(Nodo<T> raiz, T valor) {
+    private Nodo<T> delete(Nodo<T> raiz, T valor) {
         if (raiz == null) {
+            deleted = false;
             return null;
         }
 
         int comparacion = compare(valor, raiz.obtenerDato());
 
         if (comparacion < 0) {
-            raiz.left = eliminar(raiz.left, valor);
+            raiz.left = delete(raiz.left, valor);
             return raiz;
         }
 
         if (comparacion > 0) {
-            raiz.right = eliminar(raiz.right, valor);
+            raiz.right = delete(raiz.right, valor);
             return raiz;
         }
 
         if (raiz.left == null) {
+            deleted = true;
             return raiz.right;
         }
 
         if (raiz.right == null) {
+            deleted = true;
             return raiz.left;
         }
 
+        deleted = true;
         Nodo<T> sucesor = sucesorInOrder(raiz);
         raiz.dato = sucesor.dato;
-        raiz.right = eliminar(raiz.right, sucesor.dato);
+        raiz.right = delete(raiz.right, sucesor.dato);
         return raiz;
 
     }
-
-    public void inOrder() {
+@Override
+    public void inOrderTraversal() {
         if (this.raiz == null) {
             return;
         }
@@ -121,8 +141,8 @@ public class BST<T> {
         }
 
     }
-
-    public void preOrder() {
+@Override
+    public void preOrderTraversal() {
         if (this.raiz == null) {
             return;
         }
@@ -142,8 +162,8 @@ public class BST<T> {
             }
         }
     }
-
-    public void postOrder() {
+@Override
+    public void postOrderTraversal() {
         if (this.raiz == null) {
             return;
         }
@@ -161,32 +181,33 @@ public class BST<T> {
             }
         }
     }
-
-    public void recorridoPorNivel() {
+@Override
+    public void levelOrderTraversal() {
         if (this.raiz == null) {
             return;
         }
 
-        int alturaArbol = altura();
-        for (int nivel = 1; nivel <= alturaArbol; nivel++) {
+        int heightArbol = height();
+        for (int nivel = 1; nivel <= heightArbol; nivel++) {
             System.out.print("Nivel " + nivel + ": ");
             imprimirNivel(this.raiz, nivel);
             System.out.println();
         }
     }
 
-    public int altura() {
-        return altura(this.raiz);
+    @Override
+    public int height() {
+        return height(this.raiz);
     }
 
-    private int altura(Nodo<T> nodo) {
+    private int height(Nodo<T> nodo) {
         if (nodo == null) {
             return 0;
         }
 
-        int alturaIzquierda = altura(nodo.left);
-        int alturaDerecha = altura(nodo.right);
-        return Math.max(alturaIzquierda, alturaDerecha) + 1;
+        int heightIzquierda = height(nodo.left);
+        int heightDerecha = height(nodo.right);
+        return Math.max(heightIzquierda, heightDerecha) + 1;
     }
 
     private void imprimirNivel(Nodo<T> nodo, int nivel) {
@@ -268,15 +289,15 @@ public class BST<T> {
         return estaBalanceado(this.raiz);
     }
 
-    // Un arbol esta balanceado si para cada nodo, la diferencia de altura
+    // Un arbol esta balanceado si para cada nodo, la diferencia de height
     // entre su subarbol izquierdo y derecho es como maximo 1
     private boolean estaBalanceado(Nodo<T> nodo) {
         if (nodo == null) {
             return true;
         }
-        int alturaIzquierda = altura(nodo.left);
-        int alturaDerecha = altura(nodo.right);
-        if (Math.abs(alturaIzquierda - alturaDerecha) > 1) {
+        int heightIzquierda = height(nodo.left);
+        int heightDerecha = height(nodo.right);
+        if (Math.abs(heightIzquierda - heightDerecha) > 1) {
             return false;
         }
         return estaBalanceado(nodo.left) && estaBalanceado(nodo.right);
@@ -310,13 +331,19 @@ public class BST<T> {
         comparisons++;
         return comparador.compare(a, b);
     }
-    public void clearMetrics() {
+    @Override
+    public void resetMetrics() {
         comparisons = 0;
     }
     public int getComparisons() {
         return comparisons;
     }
 
+    @Override
+
+    public void getMetrics() {
+        System.out.println("Comparaciones: " + comparisons);
+    }
 
 
 
