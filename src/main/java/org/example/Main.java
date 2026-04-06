@@ -2,56 +2,43 @@ package org.example;
 
 public class Main {
     public static void main(String[] args) {
-        BST<Integer> BST = new BST<>(Integer::compareTo);
+        ArbolMulticamino<String> arbol = new ArbolMulticamino<>(5, 3);
 
-        BST.insert(84);
-        BST.insert(32);
-        BST.insert(15);
-        BST.insert(7);
-        BST.insert(91);
-        BST.insert(3);
-        BST.insert(10);
-        BST.insert(85);
-        BST.insert(99);
+        arbol.insertarRaiz("Ciudad");
 
-        System.out.println("Probando imprimir en In-order:");
-        BST.inOrderTraversal();
-        System.out.println("\nProbando imprimir en Pre-order:");
-        BST.preOrderTraversal();
-        System.out.println("\nProbando imprimir en Post-order:");
-        BST.postOrderTraversal();
-        System.out.println("\nProbando imprimir por niveles:");
-        BST.levelOrderTraversal();
+        arbol.agregarHijo("Ciudad", "Distrito1");
+        arbol.agregarHijo("Ciudad", "Distrito2");
+        arbol.agregarHijo("Ciudad", "Distrito3");
 
-        System.out.println("\n\nProbando funciones del Arbolinix:");
-        System.out.println("Altura: " + BST.height());
-        System.out.println("Min: " + BST.min());
-        System.out.println("Max: " + BST.max());
-        System.out.println("Total nodos: " + BST.contarNodos());
-        System.out.println("Total hojas: " + BST.contarHojas());
-        System.out.println("Está balanceado?: " + BST.estaBalanceado());
+        arbol.agregarHijo("Distrito1", "Zona1");
+        arbol.agregarHijo("Distrito1", "Zona2");
+        arbol.agregarHijo("Distrito2", "Zona3");
+        arbol.agregarHijo("Distrito3",  "Zona4");
 
-        System.out.println("\nProbando Metricas:");
-        BST.getMetrics();
+        arbol.agregarHijo("Zona1", "Avenida1");
+        arbol.agregarHijo("Zona1", "Avenida2");
+        arbol.agregarHijo("Zona1", "Avenida3");
+        arbol.agregarHijo("Zona2", "Avenida4");
+        arbol.agregarHijo("Zona2", "Avenida5");
+        arbol.agregarHijo("Zona3", "Avenida6");
 
-        System.out.println("\nBuscar 50 (esperando false): " + BST.search(50));
-        System.out.println("Buscar 15 (esperando true): " + BST.search(15));
-        System.out.println("Insertando 84 un duplicado (esperando false): " + BST.insert(84));
-        System.out.println("Eliminar 3 (esperado true): " + BST.delete(3));
-        System.out.println("Buscar 3 después de eliminar (esperando false): " + BST.search(3));
-        System.out.println("Estado del arbol:");
-        BST.inOrderTraversal();
-        System.out.println("\nEliminar 7 (un hijo, esperando true): " + BST.delete(7));
-        System.out.println("Estado del arbol:");
-        BST.inOrderTraversal();
-        System.out.println("\nEliminar 32 (dos hijos, esperando true): " + BST.delete(32));
-        System.out.println("Estado del arbol:");
-        BST.inOrderTraversal();
-        System.out.println("\nEliminar 999 (no existe, esperando false): " + BST.delete(999));
+        arbol.agregarHijo("Avenida1", "Interseccion1");
+        arbol.agregarHijo("Avenida1", "Interseccion2");
+        arbol.agregarHijo("Avenida2", "Interseccion3");
+        arbol.agregarHijo("Avenida3", "Interseccion4");
 
-        BST.resetMetrics();
-        System.out.println("\nMetricas despues de reset:");
-        BST.getMetrics();
+        System.out.println("\nRecorrido por niveles:");
+        arbol.recorridoPorNiveles();
+
+        System.out.println("\n\nProfundidad maxima (esperando 5): " + arbol.profundidadMaxima());
+        System.out.println("Total hojas (esperando 8): " + arbol.contarHojas());
+        System.out.println("Nodos internos (esperando 10): " + arbol.contarNodosInternos());
+        System.out.println("Factor promedio de ramificacion: " + arbol.factorPromedioRamificacion());
+        System.out.println("\nNodos en subárbol de Distrito1 (esperando 11): " + arbol.contarNodosEnSubarbol("Distrito1"));
+        System.out.println("Nodos en subárbol de Distrito2 (esperando 2): " + arbol.contarNodosEnSubarbol("Distrito2"));
+        System.out.println("Nodos en subárbol inexistente (esperando 0): " + arbol.contarNodosEnSubarbol("NoExiste"));
+        System.out.println("\nAgregar 4to hijo a Zona1 con maxHijos=3 (esperando false): " + arbol.agregarHijo("Zona1", "Avenida4"));
+        System.out.println("Agregar hijo a Interseccion1 que supera maxHeight=5 (esperado false): " + arbol.agregarHijo("Interseccion1", "Sensor1"));
 
     }
 }
