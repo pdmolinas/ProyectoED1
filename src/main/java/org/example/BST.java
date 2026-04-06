@@ -4,18 +4,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Stack;
 
-// Checklist para interfaz
-// boolean insert(T value);
-// boolean search(T value);
-// boolean delete(T value);
-// void inOrderTraversal();
-// void preOrderTraversal();
-// void postOrderTraversal();
-// void levelOrderTraversal();
-// int height();
-// void getMetrics();
-// void resetMetrics();
-
 public class BST<T> implements org.example.interfaces.SearchTree<T> {
     protected static class Nodo<T> {
         private T dato;
@@ -48,22 +36,29 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
             this.raiz = new Nodo<>(valor);
             return true;
         }
-        return insert(valor, this.raiz) != null;
+        return insert(valor, this.raiz);
 
     }
-    private Nodo<T> insert(T valor, Nodo<T> nodo) {
-        if (nodo == null) {
-            return new Nodo<>(valor);
+    private boolean insert(T valor, Nodo<T> nodo) {
+        int comparacion = compare(valor, nodo.obtenerDato());
+
+        if (comparacion == 0) {
+            return false;
         }
-        if (compare(valor, nodo.obtenerDato()) == 0) {
-            return null;
+
+        if (comparacion < 0) {
+            if (nodo.left == null) {
+                nodo.left = new Nodo<>(valor);
+                return true;
+            }
+            return insert(valor, nodo.left);
         }
-        if (compare(valor, nodo.obtenerDato()) < 0) {
-            nodo.left = insert(valor, nodo.left);
-            return nodo;
+
+        if (nodo.right == null) {
+            nodo.right = new Nodo<>(valor);
+            return true;
         }
-        nodo.right = insert(valor, nodo.right);
-        return nodo;
+        return insert(valor, nodo.right);
     }
     @Override
     public boolean search(T valor) {
