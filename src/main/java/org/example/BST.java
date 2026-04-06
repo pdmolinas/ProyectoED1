@@ -1,6 +1,7 @@
 package org.example;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Stack;
 
 // Checklist para interfaz
@@ -14,6 +15,7 @@ import java.util.Stack;
 // int height();
 // void getMetrics();
 // void resetMetrics();
+
 public class BST<T> implements org.example.interfaces.SearchTree<T> {
     protected static class Nodo<T> {
         private T dato;
@@ -123,7 +125,7 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
         return raiz;
 
     }
-@Override
+    @Override
     public void inOrderTraversal() {
         if (this.raiz == null) {
             return;
@@ -141,7 +143,7 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
         }
 
     }
-@Override
+    @Override
     public void preOrderTraversal() {
         if (this.raiz == null) {
             return;
@@ -162,36 +164,41 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
             }
         }
     }
-@Override
+
+    @Override
     public void postOrderTraversal() {
-        if (this.raiz == null) {
-            return;
-        }
-        Nodo<T> actual = this.raiz;
-        HashSet<Nodo<T>> visited = new HashSet<>();
-        while (actual != null && !visited.contains(actual)) {
-            if (actual.left != null && !visited.contains(actual.left)) {
-                actual = actual.left;
-            } else if (actual.right != null && !visited.contains(actual.right)) {
-                actual = actual.right;
-            } else {
-                System.out.print(actual.obtenerDato() + " ");
-                visited.add(actual);
-                actual = this.raiz;
-            }
-        }
-    }
-@Override
-    public void levelOrderTraversal() {
-        if (this.raiz == null) {
-            return;
+        if (this.raiz == null) return;
+
+        Stack<Nodo<T>> s1 = new Stack<>();
+        Stack<Nodo<T>> s2 = new Stack<>();
+        s1.push(this.raiz);
+
+        while (!s1.isEmpty()) {
+            Nodo<T> actual = s1.pop();
+            s2.push(actual);
+
+            if (actual.left != null) s1.push(actual.left);
+            if (actual.right != null) s1.push(actual.right);
         }
 
-        int heightArbol = height();
-        for (int nivel = 1; nivel <= heightArbol; nivel++) {
-            System.out.print("Nivel " + nivel + ": ");
-            imprimirNivel(this.raiz, nivel);
-            System.out.println();
+        while (!s2.isEmpty()) {
+            System.out.print(s2.pop().obtenerDato() + " ");
+        }
+    }
+
+    @Override
+    public void levelOrderTraversal() {
+        if (this.raiz == null) return;
+
+        Queue<Nodo<T>> queue = new LinkedList<>();
+        queue.add(this.raiz);
+
+        while (!queue.isEmpty()) {
+            Nodo<T> actual = queue.poll();
+            System.out.print(actual.obtenerDato() + " ");
+
+            if (actual.left != null)  queue.add(actual.left);
+            if (actual.right != null) queue.add(actual.right);
         }
     }
 
@@ -208,20 +215,6 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
         int heightIzquierda = height(nodo.left);
         int heightDerecha = height(nodo.right);
         return Math.max(heightIzquierda, heightDerecha) + 1;
-    }
-
-    private void imprimirNivel(Nodo<T> nodo, int nivel) {
-        if (nodo == null) {
-            return;
-        }
-
-        if (nivel == 1) {
-            System.out.print(nodo.obtenerDato() + " ");
-            return;
-        }
-
-        imprimirNivel(nodo.left, nivel - 1);
-        imprimirNivel(nodo.right, nivel - 1);
     }
 
     public int contarNodos() {
@@ -249,40 +242,18 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
         return contarHojas(nodo.left) + contarHojas(nodo.right);
     }
 
-    public Nodo<T> min() {
-        return min(this.raiz);
+    public T min() {
+        if (this.raiz == null) throw new IllegalStateException("El árbol está vacío");
+        Nodo<T> actual = this.raiz;
+        while (actual.left != null) actual = actual.left;
+        return actual.obtenerDato();
     }
 
-    private Nodo<T> min(Nodo<T> nodo) {
-        if (nodo == null) {
-            throw new IllegalStateException("El árbol está vacío");
-        }
-        Nodo<T> actual = nodo;
-        while (actual.left != null) {
-            actual = actual.left;
-        }
-        if (!(actual.obtenerDato() instanceof Integer)) {
-            throw new IllegalStateException("min solo funciona con datos numéricos");
-        }
-        return actual;
-    }
-
-    public int max() {
-        return max(this.raiz);
-    }
-
-    private int max(Nodo<T> nodo) {
-        if (nodo == null) {
-            throw new IllegalStateException("El árbol está vacío");
-        }
-        Nodo<T> actual = nodo;
-        while (actual.right != null) {
-            actual = actual.right;
-        }
-        if (!(actual.obtenerDato() instanceof Integer)) {
-            throw new IllegalStateException("max solo funciona con datos numéricos");
-        }
-        return (Integer) actual.obtenerDato();
+    public T max() {
+        if (this.raiz == null) throw new IllegalStateException("El árbol está vacío");
+        Nodo<T> actual = this.raiz;
+        while (actual.right != null) actual = actual.right;
+        return actual.obtenerDato();
     }
 
     public boolean estaBalanceado() {
@@ -303,23 +274,6 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
         return estaBalanceado(nodo.left) && estaBalanceado(nodo.right);
     }
 
-    public int sumarNodos() {
-        return sumarNodos(this.raiz);
-    }
-
-    private int sumarNodos(Nodo<T> nodo) {
-        if (nodo == null) {
-            return 0;
-        }
-
-        if (!(nodo.obtenerDato() instanceof Integer)) {
-            throw new IllegalStateException("sumarNodos solo funciona con datos numéricos");
-        }
-
-        int valorActual = (Integer) nodo.obtenerDato();
-        return valorActual + sumarNodos(nodo.left) + sumarNodos(nodo.right);
-
-    }
     private Nodo<T> sucesorInOrder(Nodo<T> raiz) {
         raiz = raiz.right;
         while (raiz != null && raiz.left != null) {
