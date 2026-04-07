@@ -1,3 +1,5 @@
+package org.example;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -8,15 +10,15 @@ public class ArbolMulticamino<T> {
     protected static class Nodo<T> {
         T dato;
         List<Nodo<T>> hijos;
-        int altura = 0; 
+        int profundidad = 0;
 
         Nodo(T dato) {
             this.dato = dato;
             this.hijos = new ArrayList<>();
-            this.altura = 0;
+            this.profundidad = 0;
         }
-        public void  setAltura (int altura) {
-            this.altura = altura;
+        public void setProfundidad(int profundidad) {
+            this.profundidad = profundidad;
         }
 
         boolean esHoja() {
@@ -24,10 +26,13 @@ public class ArbolMulticamino<T> {
         }
     }
     private Nodo<T> raiz;
-    int maxHeight = 5;
+    private int maxHeight;
+    private int maxHijos;
 
-    public ArbolMulticamino() {
+    public ArbolMulticamino(int maxHeight, int  maxHijos) {
         this.raiz = null;
+        this.maxHeight = maxHeight;
+        this.maxHijos = maxHijos;
 
     }
 
@@ -36,7 +41,7 @@ public class ArbolMulticamino<T> {
             throw new IllegalStateException("La raiz ya existe");
         }
         raiz = new Nodo<>(dato);
-        raiz.altura = 1;
+        raiz.profundidad = 1;
     }
 
     public boolean agregarHijo(T padre, T hijo) {
@@ -44,11 +49,14 @@ public class ArbolMulticamino<T> {
         if (nodoPadre == null) {
             return false;
         }
-        if (nodoPadre.altura >= maxHeight) {
+        if (nodoPadre.profundidad >= maxHeight) {
+            return false;
+        }
+        if (nodoPadre.hijos.size() >= maxHijos) {
             return false;
         }
         Nodo<T> nuevoHijo = new Nodo<>(hijo);
-        nuevoHijo.setAltura(nodoPadre.altura + 1);
+        nuevoHijo.setProfundidad(nodoPadre.profundidad + 1);
         nodoPadre.hijos.add(nuevoHijo);
 
         return true;
@@ -71,6 +79,12 @@ public class ArbolMulticamino<T> {
         }
 
         return null;
+    }
+
+    public int contarNodosEnSubarbol(T dato) {
+        Nodo<T> nodo = buscarNodo(raiz, dato);
+        if (nodo == null) return 0;
+        return contarTotalHijos(nodo);
     }
 
     public int profundidadMaxima() {
@@ -148,18 +162,23 @@ public class ArbolMulticamino<T> {
     }
 
     public void recorridoPorNiveles() {
-        if (raiz == null) {
-            return;
-        }
+        if (raiz == null) return;
+
         Queue<Nodo<T>> cola = new LinkedList<>();
-        cola.add(raiz);
+        cola.offer(raiz);
+
         while (!cola.isEmpty()) {
-            Nodo<T> actual = cola.poll();
-            System.out.print(actual.dato + " ");
-            for (Nodo<T> hijo : actual.hijos) {
-                cola.add(hijo);
+            int size = cola.size();
+
+            for (int i = 0; i < size; i++) {
+                Nodo<T> actual = cola.poll();
+                System.out.print(actual.dato + " ");
+
+                for (Nodo<T> hijo : actual.hijos) {
+                    cola.offer(hijo);
+                }
             }
-            System.out.println(); 
+            System.out.println();
         }
     }
 }

@@ -1,3 +1,4 @@
+package org.example;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -77,9 +78,34 @@ public class PriorityQueueMaxHeap<T> {
         return comparisons;
     }
 
-    public void clearMetrics() {
+    public void resetMetrics() {
         swaps = 0;
         comparisons = 0;
+    }
+
+    public boolean updatePriority(T oldValue, T newValue) {
+        // Buscar el elemento
+        int index = -1;
+        for (int i = 0; i < heap.size(); i++) {
+            if (heap.get(i).equals(oldValue)) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index == -1) return false; // no existe
+
+        heap.set(index, newValue);
+
+        // Si la nueva prioridad es mayor, sube
+        // Si es menor, baja
+        if (compare(newValue, oldValue) > 0) {
+            heapifyUp(index);
+        } else {
+            heapifyDown(index);
+        }
+
+        return true;
     }
 
     private void heapifyUp(int index) {
