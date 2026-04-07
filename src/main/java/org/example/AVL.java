@@ -11,7 +11,7 @@ public class AVL<T> implements org.example.interfaces.SearchTree<T> {
     private Node<T> root;
     private int size;
     private int comparisons;
-    private int swaps;
+    private int rotations;
     private boolean inserted;
     private boolean deleted;
 
@@ -80,7 +80,7 @@ public class AVL<T> implements org.example.interfaces.SearchTree<T> {
     private Node<T> rotateLeft(Node<T> root) {
         if (root == null)
             return null;
-        swaps++;
+        rotations++;
         if (root.right == null)
             return root;
 
@@ -97,7 +97,7 @@ public class AVL<T> implements org.example.interfaces.SearchTree<T> {
     private Node<T> rotateRight(Node<T> root) {
         if (root == null)
             return null;
-        swaps++;
+        rotations++;
         if (root.left == null)
             return root;
 
@@ -286,15 +286,15 @@ public class AVL<T> implements org.example.interfaces.SearchTree<T> {
     @Override
     public void resetMetrics() {
         comparisons = 0;
-        swaps = 0;
+        rotations = 0;
     }
 
     public int getComparisons() {
         return comparisons;
     }
 
-    public int getSwaps() {
-        return swaps;
+    public int getRotations() {
+        return rotations;
     }
 
     private int compare(T a, T b) {
@@ -304,7 +304,7 @@ public class AVL<T> implements org.example.interfaces.SearchTree<T> {
 
     public void getMetrics() {
         System.out.println("Comparisons: " + comparisons);
-        System.out.println("Swaps: " + swaps);
+        System.out.println("Rotations: " + rotations);
     }
     protected static class Node<T> {
         protected T value;

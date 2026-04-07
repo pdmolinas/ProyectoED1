@@ -40,4 +40,9 @@ public class Interseccion implements org.example.interfaces.cityPart {
         this.riskLevel = riskLevel;
     }
 
+    @Override
+    public String toString() {
+        return "Interseccion{id=" + id + ", avenida=" + avenue + ", congestion=" + congestionLevel + ", riesgo=" + riskLevel + "}";
+    }
+
 }

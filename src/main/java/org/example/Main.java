@@ -1,44 +1,71 @@
 package org.example;
 
+import org.example.elementosTransito.Event;
+import org.example.elementosTransito.Interseccion;
+import org.example.enums.EventType;
+
 public class Main {
     public static void main(String[] args) {
-        ArbolMulticamino<String> arbol = new ArbolMulticamino<>(5, 3);
+        SistemaControl sistema = new SistemaControl();
 
-        arbol.insertarRaiz("Ciudad");
+        sistema.insertarRaizCiudad("Ciudad");
+        sistema.agregarElementoCiudad("Ciudad", "Distrito1");
+        sistema.agregarElementoCiudad("Ciudad", "Distrito2");
+        sistema.agregarElementoCiudad("Distrito1", "Zona1");
+        sistema.agregarElementoCiudad("Distrito1", "Zona2");
+        sistema.agregarElementoCiudad("Distrito2", "Zona3");
+        sistema.agregarElementoCiudad("Zona1", "Avenida1");
+        sistema.agregarElementoCiudad("Zona2", "Avenida2");
+        sistema.agregarElementoCiudad("Zona3", "Avenida3");
 
-        arbol.agregarHijo("Ciudad", "Distrito1");
-        arbol.agregarHijo("Ciudad", "Distrito2");
-        arbol.agregarHijo("Ciudad", "Distrito3");
+        System.out.println("Ciudad por niveles:");
+        sistema.mostrarCiudadPorNiveles();
+        System.out.println("Profundidad maxima: " + sistema.profundidadMaximaCiudad());
+        System.out.println("Nodos en Distrito1: " + sistema.contarNodosEnDistrito("Distrito1"));
 
-        arbol.agregarHijo("Distrito1", "Zona1");
-        arbol.agregarHijo("Distrito1", "Zona2");
-        arbol.agregarHijo("Distrito2", "Zona3");
-        arbol.agregarHijo("Distrito3",  "Zona4");
+        System.out.println("\nInsertando intersecciones en BST:");
+        sistema.usarBST();
+        sistema.insertarInterseccion(new Interseccion(5, "Avenida1"));
+        sistema.insertarInterseccion(new Interseccion(2, "Avenida2"));
+        sistema.insertarInterseccion(new Interseccion(8, "Avenida3"));
+        sistema.insertarInterseccion(new Interseccion(1, "Avenida1"));
+        sistema.insertarInterseccion(new Interseccion(9, "Avenida2"));
 
-        arbol.agregarHijo("Zona1", "Avenida1");
-        arbol.agregarHijo("Zona1", "Avenida2");
-        arbol.agregarHijo("Zona1", "Avenida3");
-        arbol.agregarHijo("Zona2", "Avenida4");
-        arbol.agregarHijo("Zona2", "Avenida5");
-        arbol.agregarHijo("Zona3", "Avenida6");
+        System.out.println("InOrder BST:");
+        sistema.mostrarInOrder();
+        System.out.println();
 
-        arbol.agregarHijo("Avenida1", "Interseccion1");
-        arbol.agregarHijo("Avenida1", "Interseccion2");
-        arbol.agregarHijo("Avenida2", "Interseccion3");
-        arbol.agregarHijo("Avenida3", "Interseccion4");
+        sistema.usarAVL();
+        sistema.insertarInterseccion(new Interseccion(1, "Avenida1"));
+        sistema.insertarInterseccion(new Interseccion(2, "Avenida2"));
+        sistema.insertarInterseccion(new Interseccion(3, "Avenida3"));
+        sistema.insertarInterseccion(new Interseccion(4, "Avenida1"));
+        sistema.insertarInterseccion(new Interseccion(5, "Avenida2"));
 
-        System.out.println("\nRecorrido por niveles:");
-        arbol.recorridoPorNiveles();
+        System.out.println("InOrder AVL:");
+        sistema.mostrarInOrder();
 
-        System.out.println("\n\nProfundidad maxima (esperando 5): " + arbol.profundidadMaxima());
-        System.out.println("Total hojas (esperando 8): " + arbol.contarHojas());
-        System.out.println("Nodos internos (esperando 10): " + arbol.contarNodosInternos());
-        System.out.println("Factor promedio de ramificacion: " + arbol.factorPromedioRamificacion());
-        System.out.println("\nNodos en subárbol de Distrito1 (esperando 11): " + arbol.contarNodosEnSubarbol("Distrito1"));
-        System.out.println("Nodos en subárbol de Distrito2 (esperando 2): " + arbol.contarNodosEnSubarbol("Distrito2"));
-        System.out.println("Nodos en subárbol inexistente (esperando 0): " + arbol.contarNodosEnSubarbol("NoExiste"));
-        System.out.println("\nAgregar 4to hijo a Zona1 con maxHijos=3 (esperando false): " + arbol.agregarHijo("Zona1", "Avenida4"));
-        System.out.println("Agregar hijo a Interseccion1 que supera maxHeight=5 (esperado false): " + arbol.agregarHijo("Interseccion1", "Sensor1"));
+        Interseccion buscar = new Interseccion(5, "Avenida1");
+        System.out.println("\nBuscar ID=5 (esperando true): " + sistema.buscarInterseccion(buscar));
+        System.out.println("Eliminar ID=5 (esperando true): " + sistema.eliminarInterseccion(buscar));
+        System.out.println("Buscar ID=5 tras eliminar (esperando false): " + sistema.buscarInterseccion(buscar));
+
+        sistema.insertarEvento(new Event("Accidente grave", EventType.ACCIDENT, 1, 9, 100));
+        sistema.insertarEvento(new Event("Congestion alta", EventType.TRAFFIC_JAM, 2, 5, 200));
+        sistema.insertarEvento(new Event("Semaforo danado", EventType.ROADWORK, 3, 3, 300));
+        sistema.insertarEvento(new Event("Ambulancia", EventType.ACCIDENT, 4, 8, 150));
+
+        System.out.println("\nEvento mas prioritario: " + sistema.verEventoMasPrioritario().getName());
+        System.out.println("Procesando: " + sistema.procesarEventoMasPrioritario().getName());
+        System.out.println("Siguiente: " + sistema.verEventoMasPrioritario().getName());
+
+        sistema.ordenarEventosPorTiempo();
+        System.out.println("Mas prioritario por tiempo: " + sistema.verEventoMasPrioritario().getName());
+
+        sistema.ordenarEventosPorRiesgo();
+        System.out.println("Mas prioritario por riesgo: " + sistema.verEventoMasPrioritario().getName());
+
+        sistema.mostrarEstadisticas();
 
     }
 }
