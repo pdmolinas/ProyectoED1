@@ -67,5 +67,7 @@ public class Main {
 
         sistema.mostrarEstadisticas();
 
+        Benchmark.run();
+
     }
 }

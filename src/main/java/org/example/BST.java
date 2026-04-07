@@ -36,43 +36,36 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
             this.raiz = new Nodo<>(valor);
             return true;
         }
-        return insert(valor, this.raiz);
-
-    }
-    private boolean insert(T valor, Nodo<T> nodo) {
-        int comparacion = compare(valor, nodo.obtenerDato());
-
-        if (comparacion == 0) {
-            return false;
-        }
-
-        if (comparacion < 0) {
-            if (nodo.left == null) {
-                nodo.left = new Nodo<>(valor);
-                return true;
+        Nodo<T> actual = this.raiz;
+        while (true) {
+            int cmp = compare(valor, actual.obtenerDato());
+            if (cmp == 0) return false;
+            if (cmp < 0) {
+                if (actual.left == null) {
+                    actual.left = new Nodo<>(valor);
+                    return true;
+                }
+                actual = actual.left;
+            } else {
+                if (actual.right == null) {
+                    actual.right = new Nodo<>(valor);
+                    return true;
+                }
+                actual = actual.right;
             }
-            return insert(valor, nodo.left);
         }
-
-        if (nodo.right == null) {
-            nodo.right = new Nodo<>(valor);
-            return true;
-        }
-        return insert(valor, nodo.right);
     }
+
     @Override
     public boolean search(T valor) {
-        return search(this.raiz, valor);
-    }
-
-    private boolean search(Nodo<T> raiz, T valor) {
-        if (raiz == null)
-            return false;
-        if (compare(raiz.obtenerDato(), valor) == 0)
-            return true;
-        if (compare(raiz.obtenerDato(), valor) > 0)
-            return search(raiz.left, valor);
-        return search(raiz.right, valor);
+        Nodo<T> actual = this.raiz;
+        while (actual != null) {
+            int cmp = compare(valor, actual.obtenerDato());
+            if (cmp == 0) return true;
+            if (cmp < 0) actual = actual.left;
+            else actual = actual.right;
+        }
+        return false;
     }
 
     @Override
@@ -199,17 +192,22 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
 
     @Override
     public int height() {
-        return height(this.raiz);
-    }
+        if (this.raiz == null) return 0;
 
-    private int height(Nodo<T> nodo) {
-        if (nodo == null) {
-            return 0;
+        int altura = 0;
+        java.util.Queue<Nodo<T>> queue = new java.util.LinkedList<>();
+        queue.offer(this.raiz);
+
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            altura++;
+            for (int i = 0; i < size; i++) {
+                Nodo<T> actual = queue.poll();
+                if (actual.left != null) queue.offer(actual.left);
+                if (actual.right != null) queue.offer(actual.right);
+            }
         }
-
-        int heightIzquierda = height(nodo.left);
-        int heightDerecha = height(nodo.right);
-        return Math.max(heightIzquierda, heightDerecha) + 1;
+        return altura;
     }
 
     public int contarNodos() {
@@ -249,24 +247,6 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
         Nodo<T> actual = this.raiz;
         while (actual.right != null) actual = actual.right;
         return actual.obtenerDato();
-    }
-
-    public boolean estaBalanceado() {
-        return estaBalanceado(this.raiz);
-    }
-
-    // Un arbol esta balanceado si para cada nodo, la diferencia de height
-    // entre su subarbol izquierdo y derecho es como maximo 1
-    private boolean estaBalanceado(Nodo<T> nodo) {
-        if (nodo == null) {
-            return true;
-        }
-        int heightIzquierda = height(nodo.left);
-        int heightDerecha = height(nodo.right);
-        if (Math.abs(heightIzquierda - heightDerecha) > 1) {
-            return false;
-        }
-        return estaBalanceado(nodo.left) && estaBalanceado(nodo.right);
     }
 
     private Nodo<T> sucesorInOrder(Nodo<T> raiz) {
