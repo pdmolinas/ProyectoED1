@@ -1,0 +1,15 @@
+padre,hijo
+Ciudad,Distrito1
+Ciudad,Distrito2
+Ciudad,Distrito3
+Distrito1,Zona1
+Distrito1,Zona2
+Distrito2,Zona3
+Distrito3,Zona4
+Zona1,Avenida1
+Zona2,Avenida2
+Zona3,Avenida3
+Avenida1,Interseccion1
+Avenida1,Interseccion2
+Avenida2,Interseccion3
+Avenida3,Interseccion4

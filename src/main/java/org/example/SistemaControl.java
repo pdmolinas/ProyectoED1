@@ -5,12 +5,17 @@ import org.example.elementosTransito.Event;
 import org.example.elementosTransito.Interseccion;
 import org.example.interfaces.SearchTree;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 class SistemaControl {
     private final ArbolMulticamino<String> ciudad;
     private SearchTree<Interseccion> bst;
     private SearchTree<Interseccion> avl;
     private SearchTree<Interseccion> activeTree;
     private final PriorityQueueMaxHeap<Event> heap;
+    private boolean ciudadCargada = false;
 
     public SistemaControl() {
 
@@ -134,6 +139,34 @@ class SistemaControl {
         bst = new BST<>((a, b) -> a.getRiskLevel() - b.getRiskLevel());
         avl = new AVL<>((a, b) -> a.getRiskLevel() - b.getRiskLevel());
         System.out.println("Comparador cambiado a nivel de riesgo.");
+    }
+
+    public void cargarCiudadDesdeArchivo(String rutaArchivo) {
+        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
+            String linea;
+            br.readLine(); // saltar header
+            boolean primeraLinea = true;
+            while ((linea = br.readLine()) != null) {
+                String[] partes = linea.split(",");
+                if (partes.length == 2) {
+                    String padre = partes[0].trim();
+                    String hijo = partes[1].trim();
+                    if (primeraLinea) {
+                        ciudad.insertarRaiz(padre);
+                        primeraLinea = false;
+                    }
+                    ciudad.agregarHijo(padre, hijo);
+                }
+            }
+            ciudadCargada = true;
+            System.out.println("Ciudad cargada desde " + rutaArchivo);
+        } catch (IOException e) {
+            System.out.println("Error leyendo archivo: " + e.getMessage());
+        }
+    }
+
+    public boolean isCiudadCargada() {
+        return ciudadCargada;
     }
 
 
