@@ -5,30 +5,23 @@ import org.example.interfaces.cityPart;
 public class zone implements cityPart {
     private final int id;
     private final String name;
-    private final String district;
 
-    public zone(int id, String name, String district) {
+    public zone(int id, String name) {
         this.id = id;
         this.name = name;
-        this.district = district;
     }
 
+    @Override public int getId()           { return id; }
+    @Override public String getName()      { return name; }
+    @Override public urbanLevel getLevel() { return urbanLevel.ZONE; }
 
     @Override
-    public int getId() {
-        return id;
-    }
-    @Override
-    public String getName() {
-        return name;
-    }
-    @Override
-    public urbanLevel getLevel() {
-        return urbanLevel.ZONE;
-    }
-    public String getDistrict() {
-        return district;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof zone)) return false;
+        return name.equals(((zone) o).name);
     }
 
-
+    @Override public int hashCode()    { return name.hashCode(); }
+    @Override public String toString() { return name; }
 }

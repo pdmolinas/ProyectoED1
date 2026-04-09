@@ -2,7 +2,6 @@ package org.example.elementosTransito;
 import org.example.enums.urbanLevel;
 import org.example.interfaces.cityPart;
 
-
 public class district implements cityPart {
     private final int id;
     private final String name;
@@ -12,19 +11,17 @@ public class district implements cityPart {
         this.name = name;
     }
 
-    @Override
-    public int getId() {
-        return id;
-    }
+    @Override public int getId()           { return id; }
+    @Override public String getName()      { return name; }
+    @Override public urbanLevel getLevel() { return urbanLevel.DISTRICT; }
 
     @Override
-    public String getName() {
-        return name;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof district)) return false;
+        return name.equals(((district) o).name);
     }
 
-    @Override
-    public urbanLevel getLevel() {
-        return urbanLevel.DISTRICT;
-    }
-    
+    @Override public int hashCode()    { return name.hashCode(); }
+    @Override public String toString() { return name; }
 }

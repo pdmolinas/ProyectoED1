@@ -10,19 +10,17 @@ public class city implements org.example.interfaces.cityPart {
         this.name = name;
     }
 
-    @Override
-    public int getId() {
-        return id;
-    }
+    @Override public int getId()           { return id; }
+    @Override public String getName()      { return name; }
+    @Override public urbanLevel getLevel() { return urbanLevel.CITY; }
 
     @Override
-    public String getName() {
-        return name;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof city)) return false;
+        return name.equals(((city) o).name);
     }
 
-    @Override
-    public urbanLevel getLevel() {
-        return urbanLevel.CITY;
-    }
-
+    @Override public int hashCode()    { return name.hashCode(); }
+    @Override public String toString() { return name; }
 }

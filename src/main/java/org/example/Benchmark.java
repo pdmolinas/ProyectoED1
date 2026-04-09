@@ -3,6 +3,9 @@ package org.example;
 import org.example.elementosTransito.Event;
 import org.example.elementosTransito.Interseccion;
 import org.example.enums.EventType;
+import org.example.estructuras.AVL;
+import org.example.estructuras.BST;
+import org.example.estructuras.PriorityQueueMaxHeap;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -33,6 +36,8 @@ public class Benchmark {
                 int alturaBSTOrdenado = bst.height();
                 int alturaAVLOrdenado = avl.height();
 
+                bst.resetMetrics();
+                avl.resetMetrics();
                 long bstOrdenadoBusqueda = medirBusqueda(bst, n);
                 long avlOrdenadoBusqueda = medirBusqueda(avl, n);
 
@@ -49,6 +54,8 @@ public class Benchmark {
                 int alturaBSTRandom = bstRandom.height();
                 int alturaAVLRandom = avlRandom.height();
 
+                bstRandom.resetMetrics();
+                avlRandom.resetMetrics();
                 long bstRandomBusqueda = medirBusqueda(bstRandom, n);
                 long avlRandomBusqueda = medirBusqueda(avlRandom, n);
 

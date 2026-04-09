@@ -1,4 +1,4 @@
-package org.example;
+package org.example.estructuras;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -209,13 +209,10 @@ public class AVL<T> implements org.example.interfaces.SearchTree<T> {
 
      private void inOrderTraversal(Node<T> node) {
         if (node == null)
-            return; 
-        if (node != null) {
-            inOrderTraversal(node.left);
-            System.out.print(node.value + " ");
-            inOrderTraversal(node.right);
-        }
-
+            return;
+        inOrderTraversal(node.left);
+        System.out.print(node.value + " ");
+        inOrderTraversal(node.right);
     }
     @Override
     public void preOrderTraversal() {
@@ -223,13 +220,10 @@ public class AVL<T> implements org.example.interfaces.SearchTree<T> {
     }
     private void preOrderTraversal(Node<T> node) {
         if (node == null)
-            return; 
-        if (node != null) {
-            System.out.print(node.value + " ");
-            preOrderTraversal(node.left);
-            preOrderTraversal(node.right);
-        }
-
+            return;
+        System.out.print(node.value + " ");
+        preOrderTraversal(node.left);
+        preOrderTraversal(node.right);
     }
     @Override
     public void postOrderTraversal() {
@@ -237,13 +231,10 @@ public class AVL<T> implements org.example.interfaces.SearchTree<T> {
     }
     private void postOrderTraversal(Node<T> node) {
         if (node == null)
-            return; 
-        if (node != null) {
-            postOrderTraversal(node.left);
-            postOrderTraversal(node.right);
-            System.out.print(node.value + " ");
-        }
-
+            return;
+        postOrderTraversal(node.left);
+        postOrderTraversal(node.right);
+        System.out.print(node.value + " ");
     }
     @Override
     public void levelOrderTraversal() {

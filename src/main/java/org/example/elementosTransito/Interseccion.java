@@ -41,8 +41,16 @@ public class Interseccion implements org.example.interfaces.cityPart {
     }
 
     @Override
-    public String toString() {
-        return "Interseccion{id=" + id + ", avenida=" + avenue + ", congestion=" + congestionLevel + ", riesgo=" + riskLevel + "}";
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Interseccion)) return false;
+        return avenue.equals(((Interseccion) o).avenue);
     }
 
+    @Override public int hashCode()    { return avenue.hashCode(); }
+
+    @Override
+    public String toString() {
+        return avenue + " (id=" + id + ", congestion=" + congestionLevel + ", riesgo=" + riskLevel + ")";
+    }
 }

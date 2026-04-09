@@ -1,4 +1,4 @@
-package org.example;
+package org.example.estructuras;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +84,7 @@ public class ArbolMulticamino<T> {
     public int contarNodosEnSubarbol(T dato) {
         Nodo<T> nodo = buscarNodo(raiz, dato);
         if (nodo == null) return 0;
-        return contarTotalHijos(nodo);
+        return contarTotalHijos(nodo) + 1; // +1 para incluir el nodo raíz del subárbol
     }
 
     public int profundidadMaxima() {
@@ -147,7 +147,7 @@ public class ArbolMulticamino<T> {
         }
         int totalHijos = contarTotalHijos(raiz);
         int nodosInternos = contarNodosInternos(raiz);
-        
+        if (nodosInternos == 0) return 0.0; // solo hay raíz, no hay nodos internos
         return (double) totalHijos / nodosInternos;
     }
     private int contarTotalHijos(Nodo<T> actual) {
@@ -159,6 +159,23 @@ public class ArbolMulticamino<T> {
             totalHijos += contarTotalHijos(hijo);
         }
         return totalHijos;
+    }
+
+    public void mostrarJerarquia() {
+        if (raiz == null) {
+            System.out.println("(árbol vacío)");
+            return;
+        }
+        mostrarJerarquia(raiz, 0);
+    }
+
+    private void mostrarJerarquia(Nodo<T> actual, int nivel) {
+        String prefijo = "  ".repeat(nivel);
+        String marcador = nivel == 0 ? "" : "└─ ";
+        System.out.println(prefijo + marcador + actual.dato);
+        for (Nodo<T> hijo : actual.hijos) {
+            mostrarJerarquia(hijo, nivel + 1);
+        }
     }
 
     public void recorridoPorNiveles() {

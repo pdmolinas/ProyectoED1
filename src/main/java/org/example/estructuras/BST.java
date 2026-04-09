@@ -1,4 +1,4 @@
-package org.example;
+package org.example.estructuras;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -23,7 +23,6 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
     private Nodo<T> raiz;
     private Comparator<T> comparador;
     private int comparisons = 0;
-    private boolean deleted;
 
     public BST(Comparator<T> comparador) {
         this.comparador = comparador;
@@ -70,48 +69,45 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
 
     @Override
     public boolean delete(T valor) {
-        deleted = false;
-        if (!search(valor)) {
-            return false;
-        }
-        this.raiz = delete(this.raiz, valor);
-        return deleted;
-    }
+        if (this.raiz == null) return false;
 
-    private Nodo<T> delete(Nodo<T> raiz, T valor) {
-        if (raiz == null) {
-            deleted = false;
-            return null;
-        }
+        Nodo<T> parent = null;
+        Nodo<T> actual = this.raiz;
+        boolean isLeftChild = false;
 
-        int comparacion = compare(valor, raiz.obtenerDato());
-
-        if (comparacion < 0) {
-            raiz.left = delete(raiz.left, valor);
-            return raiz;
+        // Buscar el nodo a eliminar
+        while (actual != null) {
+            int cmp = compare(valor, actual.obtenerDato());
+            if (cmp == 0) break;
+            parent = actual;
+            if (cmp < 0) { actual = actual.left;  isLeftChild = true; }
+            else          { actual = actual.right; isLeftChild = false; }
         }
 
-        if (comparacion > 0) {
-            raiz.right = delete(raiz.right, valor);
-            return raiz;
+        if (actual == null) return false; // no encontrado
+
+        if (actual.left != null && actual.right != null) {
+            // Nodo con dos hijos: reemplazar con sucesor in-order
+            Nodo<T> successorParent = actual;
+            Nodo<T> successor = actual.right;
+            while (successor.left != null) {
+                successorParent = successor;
+                successor = successor.left;
+            }
+            actual.dato = successor.dato;
+            // Eliminar el sucesor (tiene como mucho hijo derecho)
+            Nodo<T> successorChild = successor.right;
+            if (successorParent == actual) successorParent.right = successorChild;
+            else                           successorParent.left  = successorChild;
+        } else {
+            // Nodo con 0 o 1 hijo
+            Nodo<T> child = (actual.left != null) ? actual.left : actual.right;
+            if (parent == null)       this.raiz    = child;
+            else if (isLeftChild)     parent.left  = child;
+            else                      parent.right = child;
         }
 
-        if (raiz.left == null) {
-            deleted = true;
-            return raiz.right;
-        }
-
-        if (raiz.right == null) {
-            deleted = true;
-            return raiz.left;
-        }
-
-        deleted = true;
-        Nodo<T> sucesor = sucesorInOrder(raiz);
-        raiz.dato = sucesor.dato;
-        raiz.right = delete(raiz.right, sucesor.dato);
-        return raiz;
-
+        return true;
     }
     @Override
     public void inOrderTraversal() {
@@ -210,52 +206,6 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
         return altura;
     }
 
-    public int contarNodos() {
-        return contarNodos(this.raiz);
-    }
-
-    private int contarNodos(Nodo<T> nodo) {
-        if (nodo == null) {
-            return 0;
-        }
-        return 1 + contarNodos(nodo.left) + contarNodos(nodo.right);
-    }
-
-    public int contarHojas() {
-        return contarHojas(this.raiz);
-    }
-
-    private int contarHojas(Nodo<T> nodo) {
-        if (nodo == null) {
-            return 0;
-        }
-        if (nodo.left == null && nodo.right == null) {
-            return 1;
-        }
-        return contarHojas(nodo.left) + contarHojas(nodo.right);
-    }
-
-    public T min() {
-        if (this.raiz == null) throw new IllegalStateException("El árbol está vacío");
-        Nodo<T> actual = this.raiz;
-        while (actual.left != null) actual = actual.left;
-        return actual.obtenerDato();
-    }
-
-    public T max() {
-        if (this.raiz == null) throw new IllegalStateException("El árbol está vacío");
-        Nodo<T> actual = this.raiz;
-        while (actual.right != null) actual = actual.right;
-        return actual.obtenerDato();
-    }
-
-    private Nodo<T> sucesorInOrder(Nodo<T> raiz) {
-        raiz = raiz.right;
-        while (raiz != null && raiz.left != null) {
-            raiz = raiz.left;
-        }
-        return raiz;
-    }
     private int compare(T a, T b) {
         comparisons++;
         return comparador.compare(a, b);

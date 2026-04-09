@@ -2,7 +2,7 @@ package org.example.enums;
 
 public enum EventType {
     ACCIDENT,
-    ROADWORK,
+    EMERGENCY_VEHICLE,
     TRAFFIC_JAM,
     WEATHER_HAZARD
 }
