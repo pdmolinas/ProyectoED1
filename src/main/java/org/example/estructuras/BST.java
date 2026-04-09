@@ -75,7 +75,6 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
         Nodo<T> actual = this.raiz;
         boolean isLeftChild = false;
 
-        // Buscar el nodo a eliminar
         while (actual != null) {
             int cmp = compare(valor, actual.obtenerDato());
             if (cmp == 0) break;
@@ -84,10 +83,9 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
             else          { actual = actual.right; isLeftChild = false; }
         }
 
-        if (actual == null) return false; // no encontrado
+        if (actual == null) return false;
 
         if (actual.left != null && actual.right != null) {
-            // Nodo con dos hijos: reemplazar con sucesor in-order
             Nodo<T> successorParent = actual;
             Nodo<T> successor = actual.right;
             while (successor.left != null) {
@@ -95,12 +93,10 @@ public class BST<T> implements org.example.interfaces.SearchTree<T> {
                 successor = successor.left;
             }
             actual.dato = successor.dato;
-            // Eliminar el sucesor (tiene como mucho hijo derecho)
             Nodo<T> successorChild = successor.right;
             if (successorParent == actual) successorParent.right = successorChild;
             else                           successorParent.left  = successorChild;
         } else {
-            // Nodo con 0 o 1 hijo
             Nodo<T> child = (actual.left != null) ? actual.left : actual.right;
             if (parent == null)       this.raiz    = child;
             else if (isLeftChild)     parent.left  = child;

@@ -9,6 +9,8 @@ import org.example.estructuras.PriorityQueueMaxHeap;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 public class Benchmark {
@@ -21,7 +23,8 @@ public class Benchmark {
         System.out.println("Iniciando benchmark...");
 
         try (FileWriter csv = new FileWriter("benchmark_results.csv")) {
-            csv.write("Tamaño,Estructura,Tipo,TiempoInsercionNs,TiempoBusquedaNs,AlturaBST,AlturaAVL,Comparaciones,Rotaciones\n");
+            csv.write("Tamaño,Estructura,Tipo,TiempoInsercionPromNs,TiempoBusquedaPromNs,TiempoExtraccionNs," +
+                      "AlturaBST,AlturaAVL,BalanceFactorRaizAVL,Comparaciones,Rotaciones\n");
 
             for (int n : SIZES) {
                 System.out.println("Probando con " + n + " intersecciones...");
@@ -29,45 +32,68 @@ public class Benchmark {
                 BST<Interseccion> bst = new BST<>((a, b) -> a.getId() - b.getId());
                 AVL<Interseccion> avl = new AVL<>((a, b) -> a.getId() - b.getId());
 
-                // Insercion ordenada (peor caso BST)
-                long bstOrdenadoInsercion = medirInsercionOrdenada(bst, n);
-                long avlOrdenadoInsercion = medirInsercionOrdenada(avl, n);
+                long bstOrdenadoIns = medirInsercionOrdenada(bst, n);
+                long avlOrdenadoIns = medirInsercionOrdenada(avl, n);
 
-                int alturaBSTOrdenado = bst.height();
-                int alturaAVLOrdenado = avl.height();
+                int alturaBSTOrd = bst.height();
+                int alturaAVLOrd = avl.height();
+                int balanceAVLOrd = avl.getRootBalanceFactor();
 
-                bst.resetMetrics();
-                avl.resetMetrics();
-                long bstOrdenadoBusqueda = medirBusqueda(bst, n);
-                long avlOrdenadoBusqueda = medirBusqueda(avl, n);
+                bst.resetMetrics(); avl.resetMetrics();
+                long bstOrdenadoBus = medirBusqueda(bst, n);
+                long avlOrdenadoBus = medirBusqueda(avl, n);
 
-                csv.write(n + ",BST,Ordenada," + bstOrdenadoInsercion + "," + bstOrdenadoBusqueda + "," + alturaBSTOrdenado + "," + alturaAVLOrdenado + "," + bst.getComparisons() + ",0\n");
-                csv.write(n + ",AVL,Ordenada," + avlOrdenadoInsercion + "," + avlOrdenadoBusqueda + "," + alturaBSTOrdenado + "," + alturaAVLOrdenado + "," + avl.getComparisons() + "," + avl.getRotations() + "\n");
+                csv.write(n + ",BST,Ordenada," + (bstOrdenadoIns / n) + "," + bstOrdenadoBus + ",0,"
+                        + alturaBSTOrd + "," + alturaAVLOrd + ",0," + bst.getComparisons() + ",0\n");
+                csv.write(n + ",AVL,Ordenada," + (avlOrdenadoIns / n) + "," + avlOrdenadoBus + ",0,"
+                        + alturaBSTOrd + "," + alturaAVLOrd + "," + balanceAVLOrd + ","
+                        + avl.getComparisons() + "," + avl.getRotations() + "\n");
 
-                // Insercion aleatoria (caso promedio)
-                BST<Interseccion> bstRandom = new BST<>((a, b) -> a.getId() - b.getId());
-                AVL<Interseccion> avlRandom = new AVL<>((a, b) -> a.getId() - b.getId());
+                BST<Interseccion> bstR = new BST<>((a, b) -> a.getId() - b.getId());
+                AVL<Interseccion> avlR = new AVL<>((a, b) -> a.getId() - b.getId());
 
-                long bstRandomInsercion = medirInsercionAleatoria(bstRandom, n);
-                long avlRandomInsercion = medirInsercionAleatoria(avlRandom, n);
+                long bstRandomIns = medirInsercionAleatoria(bstR, n);
+                long avlRandomIns = medirInsercionAleatoria(avlR, n);
 
-                int alturaBSTRandom = bstRandom.height();
-                int alturaAVLRandom = avlRandom.height();
+                int alturaBSTRnd = bstR.height();
+                int alturaAVLRnd = avlR.height();
+                int balanceAVLRnd = avlR.getRootBalanceFactor();
 
-                bstRandom.resetMetrics();
-                avlRandom.resetMetrics();
-                long bstRandomBusqueda = medirBusqueda(bstRandom, n);
-                long avlRandomBusqueda = medirBusqueda(avlRandom, n);
+                bstR.resetMetrics(); avlR.resetMetrics();
+                long bstRandomBus = medirBusqueda(bstR, n);
+                long avlRandomBus = medirBusqueda(avlR, n);
 
-                csv.write(n + ",BST,Aleatoria," + bstRandomInsercion + "," + bstRandomBusqueda + "," + alturaBSTRandom + "," + alturaAVLRandom + "," + bstRandom.getComparisons() + ",0\n");
-                csv.write(n + ",AVL,Aleatoria," + avlRandomInsercion + "," + avlRandomBusqueda + "," + alturaBSTRandom + "," + alturaAVLRandom + "," + avlRandom.getComparisons() + "," + avlRandom.getRotations() + "\n");
+                csv.write(n + ",BST,Aleatoria," + (bstRandomIns / n) + "," + bstRandomBus + ",0,"
+                        + alturaBSTRnd + "," + alturaAVLRnd + ",0," + bstR.getComparisons() + ",0\n");
+                csv.write(n + ",AVL,Aleatoria," + (avlRandomIns / n) + "," + avlRandomBus + ",0,"
+                        + alturaBSTRnd + "," + alturaAVLRnd + "," + balanceAVLRnd + ","
+                        + avlR.getComparisons() + "," + avlR.getRotations() + "\n");
 
-                // Procesamiento de eventos
-                long tiempoEventos = medirEventos();
-                csv.write(n + ",Heap,Eventos," + tiempoEventos + ",0,0,0,0,0\n");
+                long[] heap = medirEventosHeap();
+                long heapIns     = heap[0];
+                long heapExtract = heap[1];
 
-                System.out.println("  BST ordenado altura: " + alturaBSTOrdenado + " | AVL ordenado altura: " + alturaAVLOrdenado);
-                System.out.println("  BST aleatorio altura: " + alturaBSTRandom + " | AVL aleatorio altura: " + alturaAVLRandom);
+                long[] lista = medirEventosLista();
+                long listaIns     = lista[0];
+                long listaExtract = lista[1];
+
+                csv.write(n + ",Heap,Eventos," + heapIns + ",0," + heapExtract + ",0,0,0,0,0\n");
+                csv.write(n + ",ListaOrdenada,Eventos," + listaIns + ",0," + listaExtract + ",0,0,0,0,0\n");
+
+                System.out.printf("  [Ordenada]  BST altura=%d | AVL altura=%d | AVL balance=%d%n",
+                        alturaBSTOrd, alturaAVLOrd, balanceAVLOrd);
+                System.out.printf("              BST ins prom=%,d ns/elem | AVL ins prom=%,d ns/elem%n",
+                        bstOrdenadoIns / n, avlOrdenadoIns / n);
+                System.out.printf("  [Aleatoria] BST altura=%d | AVL altura=%d%n",
+                        alturaBSTRnd, alturaAVLRnd);
+                System.out.printf("              BST ins prom=%,d ns/elem | AVL ins prom=%,d ns/elem%n",
+                        bstRandomIns / n, avlRandomIns / n);
+                System.out.printf("  [Heap  ] ins=%,d ns/evento | extraccion=%,d ns total (%d eventos)%n",
+                        heapIns / EVENT_COUNT, heapExtract, EVENT_COUNT);
+                System.out.printf("  [Lista ] ins=%,d ns/evento | extraccion=%,d ns total%n",
+                        listaIns / EVENT_COUNT, listaExtract);
+                System.out.printf("  Heap es %.1fx mas rapido en insercion que lista ordenada%n",
+                        (double) listaIns / Math.max(heapIns, 1));
             }
 
             System.out.println("\nBenchmark completado. Resultados en benchmark_results.csv");
@@ -103,17 +129,47 @@ public class Benchmark {
         return (System.nanoTime() - inicio) / SEARCH_SAMPLES;
     }
 
-    private static long medirEventos() {
-        PriorityQueueMaxHeap<Event> heap = new PriorityQueueMaxHeap<>((a, b) -> a.getRiskLevel() - b.getRiskLevel());
+    private static long[] medirEventosHeap() {
+        PriorityQueueMaxHeap<Event> heap =
+                new PriorityQueueMaxHeap<>((a, b) -> a.getRiskLevel() - b.getRiskLevel());
         Random random = new Random(42);
+        EventType[] tipos = EventType.values();
 
-        long inicio = System.nanoTime();
+        long inicioIns = System.nanoTime();
         for (int i = 0; i < EVENT_COUNT; i++) {
-            heap.insert(new Event("Evento" + i, EventType.ACCIDENT, i, random.nextInt(10), i));
+            heap.insert(new Event("Evento" + i, tipos[random.nextInt(tipos.length)], i, random.nextInt(10) + 1, i));
         }
+        long tiempoIns = System.nanoTime() - inicioIns;
+
+        long inicioExt = System.nanoTime();
         while (!heap.isEmpty()) {
             heap.pop();
         }
-        return System.nanoTime() - inicio;
+        long tiempoExt = System.nanoTime() - inicioExt;
+
+        return new long[]{tiempoIns, tiempoExt};
+    }
+
+    private static long[] medirEventosLista() {
+        ArrayList<Event> lista = new ArrayList<>();
+        Random random = new Random(42);
+        EventType[] tipos = EventType.values();
+
+        long inicioIns = System.nanoTime();
+        for (int i = 0; i < EVENT_COUNT; i++) {
+            Event e = new Event("Evento" + i, tipos[random.nextInt(tipos.length)], i, random.nextInt(10) + 1, i);
+            int pos = Collections.binarySearch(lista, e, (a, b) -> a.getRiskLevel() - b.getRiskLevel());
+            if (pos < 0) pos = -(pos + 1);
+            lista.add(pos, e);
+        }
+        long tiempoIns = System.nanoTime() - inicioIns;
+
+        long inicioExt = System.nanoTime();
+        while (!lista.isEmpty()) {
+            lista.remove(lista.size() - 1);
+        }
+        long tiempoExt = System.nanoTime() - inicioExt;
+
+        return new long[]{tiempoIns, tiempoExt};
     }
 }

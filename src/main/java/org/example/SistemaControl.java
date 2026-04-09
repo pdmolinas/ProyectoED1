@@ -22,6 +22,7 @@ class SistemaControl {
     private SearchTree<Interseccion> avl;
     private SearchTree<Interseccion> activeTree;
     private final PriorityQueueMaxHeap<Event> heap;
+    private final Map<Integer, Interseccion> indiceIntersecciones = new HashMap<>();
     private boolean ciudadCargada = false;
 
     public SistemaControl() {
@@ -31,8 +32,6 @@ class SistemaControl {
         this.heap = new PriorityQueueMaxHeap<>((a, b) -> a.getRiskLevel() - b.getRiskLevel());
         this.ciudad = new ArbolMulticamino<>(6, 10);
     }
-
-    // ── Indexación ────────────────────────────────────────────────────────────
 
     public void usarBST() {
         this.activeTree = bst;
@@ -44,13 +43,12 @@ class SistemaControl {
         System.out.println("Usando AVL como estructura de indexación.");
     }
 
-    /** §2 — cambiar criterio de orden dinámicamente (lambda) */
     public void cambiarComparadorPorId() {
         boolean usandoBST = (activeTree == bst);
         bst = new BST<>((a, b) -> a.getId() - b.getId());
         avl = new AVL<>((a, b) -> a.getId() - b.getId());
         activeTree = usandoBST ? bst : avl;
-        System.out.println("Comparador cambiado a ID. Nota: el árbol se reinició (el orden BST/AVL depende del criterio de inserción).");
+        System.out.println("Comparador cambiado a ID. Nota: el árbol se reinició.");
     }
 
     public void cambiarComparadorPorCongestion() {
@@ -70,7 +68,9 @@ class SistemaControl {
     }
 
     public boolean insertarInterseccion(Interseccion interseccion) {
-        return activeTree.insert(interseccion);
+        boolean ok = activeTree.insert(interseccion);
+        if (ok) indiceIntersecciones.put(interseccion.getId(), interseccion);
+        return ok;
     }
 
     public boolean buscarInterseccion(Interseccion interseccion) {
@@ -78,29 +78,46 @@ class SistemaControl {
     }
 
     public boolean eliminarInterseccion(Interseccion interseccion) {
-        return activeTree.delete(interseccion);
+        boolean ok = activeTree.delete(interseccion);
+        if (ok) indiceIntersecciones.remove(interseccion.getId());
+        return ok;
     }
 
-    // ── Eventos ───────────────────────────────────────────────────────────────
+    public Interseccion obtenerInterseccion(int id) {
+        return indiceIntersecciones.get(id);
+    }
 
     public void insertarEvento(Event evento) {
         heap.insert(evento);
     }
 
     public Event procesarEventoMasPrioritario() {
-        return heap.pop();
+        Event evento = heap.pop();
+        if (evento != null) actualizarInterseccion(evento);
+        return evento;
+    }
+
+    private void actualizarInterseccion(Event evento) {
+        Interseccion inter = indiceIntersecciones.get(evento.getIntersectionId());
+        if (inter == null) return;
+        switch (evento.getType()) {
+            case ACCIDENT ->          { inter.setRiskLevel(10);
+                                        inter.setCongestionLevel(Math.min(10, inter.getCongestionLevel() + 3)); }
+            case EMERGENCY_VEHICLE -> inter.setRiskLevel(Math.max(inter.getRiskLevel(), 8));
+            case TRAFFIC_JAM ->       inter.setCongestionLevel(10);
+            case WEATHER_HAZARD ->   { inter.setCongestionLevel(Math.min(10, inter.getCongestionLevel() + 2));
+                                        inter.setRiskLevel(Math.min(10, inter.getRiskLevel() + 1)); }
+        }
     }
 
     public Event verEventoMasPrioritario() {
         return heap.peek();
     }
 
-    /** §3.4 — Modificar prioridad */
     public boolean modificarPrioridad(Event oldEvento, Event newEvento) {
         return heap.updatePriority(oldEvento, newEvento);
     }
 
-    /** §2 + §3.4 — Cambiar criterio de la cola dinámicamente (lambda) */
     public void ordenarEventosPorRiesgo() {
         heap.changeComparator((a, b) -> a.getRiskLevel() - b.getRiskLevel());
         System.out.println("Cola reordenada por nivel de riesgo.");
@@ -111,12 +128,14 @@ class SistemaControl {
         System.out.println("Cola reordenada por tiempo de reporte.");
     }
 
-    // ── Ciudad (árbol N-ario) ─────────────────────────────────────────────────
-
-    /** §3.3 — ¿Cuántas intersecciones hay en un distrito? */
     public int contarNodosEnDistrito(String nombreDistrito) {
         return ciudad.contarNodosEnSubarbol(new district(0, nombreDistrito));
     }
+
+    public void mostrarInOrder()    { activeTree.inOrderTraversal(); }
+    public void mostrarPreOrder()   { activeTree.preOrderTraversal(); }
+    public void mostrarPostOrder()  { activeTree.postOrderTraversal(); }
+    public void mostrarPorNiveles() { activeTree.levelOrderTraversal(); }
 
     public void mostrarJerarquiaCiudad() {
         ciudad.mostrarJerarquia();
@@ -125,8 +144,6 @@ class SistemaControl {
     public void mostrarCiudadPorNiveles() {
         ciudad.recorridoPorNiveles();
     }
-
-    // ── Estadísticas ──────────────────────────────────────────────────────────
 
     public void mostrarEstadisticas() {
         System.out.println("\nEstadísticas");
@@ -142,15 +159,13 @@ class SistemaControl {
         activeTree.getMetrics();
     }
 
-    // ── Carga desde archivo ───────────────────────────────────────────────────
-
     public void cargarCiudadDesdeArchivo(String rutaArchivo) {
         if (ciudadCargada) {
             System.out.println("Ya hay una ciudad cargada. Reinicia el sistema para cargar otra.");
             return;
         }
         try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivo))) {
-            br.readLine(); // saltar header
+            br.readLine();
             String linea;
             Map<String, cityPart> nodos = new HashMap<>();
             int idCounter = 0;
@@ -162,7 +177,6 @@ class SistemaControl {
                 String padre = partes[0].trim();
                 String hijo  = partes[1].trim();
 
-                // Primera vez: crear raíz (ciudad)
                 if (primeraLinea) {
                     city raiz = new city(idCounter++, padre);
                     ciudad.insertarRaiz(raiz);
@@ -174,13 +188,17 @@ class SistemaControl {
                 if (padreObj == null) continue;
 
                 urbanLevel nivelHijo = nextLevel(padreObj.getLevel());
-                if (nivelHijo == null) continue; // padre es nodo hoja, se ignora
+                if (nivelHijo == null) continue;
 
-                // Crear hijo tipado según el nivel del padre
                 if (!nodos.containsKey(hijo)) {
                     cityPart hijoObj = crearNodo(nivelHijo, idCounter++, hijo);
                     nodos.put(hijo, hijoObj);
                     ciudad.agregarHijo(padreObj, hijoObj);
+                    if (hijoObj instanceof Interseccion i) {
+                        bst.insert(i);
+                        avl.insert(i);
+                        indiceIntersecciones.put(i.getId(), i);
+                    }
                 }
             }
             ciudadCargada = true;
@@ -206,7 +224,7 @@ class SistemaControl {
             case DISTRICT -> urbanLevel.ZONE;
             case ZONE     -> urbanLevel.AVENUE;
             case AVENUE   -> urbanLevel.INTERSECTION;
-            default -> null; // nivel hoja, no tiene siguiente
+            default       -> null;
         };
     }
 

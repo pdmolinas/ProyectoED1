@@ -84,7 +84,7 @@ public class ArbolMulticamino<T> {
     public int contarNodosEnSubarbol(T dato) {
         Nodo<T> nodo = buscarNodo(raiz, dato);
         if (nodo == null) return 0;
-        return contarTotalHijos(nodo) + 1; // +1 para incluir el nodo raíz del subárbol
+        return contarTotalHijos(nodo) + 1;
     }
 
     public int profundidadMaxima() {
@@ -147,7 +147,7 @@ public class ArbolMulticamino<T> {
         }
         int totalHijos = contarTotalHijos(raiz);
         int nodosInternos = contarNodosInternos(raiz);
-        if (nodosInternos == 0) return 0.0; // solo hay raíz, no hay nodos internos
+        if (nodosInternos == 0) return 0.0;
         return (double) totalHijos / nodosInternos;
     }
     private int contarTotalHijos(Nodo<T> actual) {

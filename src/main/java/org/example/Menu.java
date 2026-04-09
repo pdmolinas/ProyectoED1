@@ -27,6 +27,7 @@ public class Menu {
             System.out.println("4. Mostrar estadisticas");
             System.out.println("5. Ejecutar benchmark");
             System.out.println("6. Ver jerarquia de la ciudad");
+            System.out.println("7. Gestionar intersecciones (BST/AVL)");
             System.out.println("0. Salir");
             System.out.print("Opcion: ");
 
@@ -45,14 +46,13 @@ public class Menu {
                 case 4 -> menuEstadisticas();
                 case 5 -> Benchmark.run();
                 case 6 -> menuCiudad();
+                case 7 -> menuIntersecciones();
                 case 0 -> System.out.println("Saliendo.");
                 default -> System.out.println("Opcion invalida.");
             }
         }
         scanner.close();
     }
-
-    // ── Submenús ──────────────────────────────────────────────────────────────
 
     private void menuCargarCiudad() {
         System.out.print("Ruta del archivo (Enter para usar ciudad.csv): ");
@@ -98,8 +98,20 @@ public class Menu {
             case 1 -> insertarEvento();
             case 2 -> {
                 Event e = sistema.procesarEventoMasPrioritario();
-                if (e == null) System.out.println("No hay eventos en cola.");
-                else System.out.println("Procesando: " + e.getName() + " (riesgo=" + e.getRiskLevel() + ")");
+                if (e == null) {
+                    System.out.println("No hay eventos en cola.");
+                } else {
+                    System.out.println("Procesando: [" + e.getType() + "] " + e.getName()
+                            + " (riesgo=" + e.getRiskLevel() + ")");
+                    var inter = sistema.obtenerInterseccion(e.getIntersectionId());
+                    if (inter != null)
+                        System.out.println("  → Interseccion " + e.getIntersectionId()
+                                + " actualizada: congestion=" + inter.getCongestionLevel()
+                                + ", riesgo=" + inter.getRiskLevel());
+                    else
+                        System.out.println("  → Interseccion " + e.getIntersectionId()
+                                + " no registrada en el sistema.");
+                }
             }
             case 3 -> {
                 Event e = sistema.verEventoMasPrioritario();
@@ -190,7 +202,48 @@ public class Menu {
         }
     }
 
-    // ── Utilidades ────────────────────────────────────────────────────────────
+    private void menuIntersecciones() {
+        System.out.println("\n--- Gestionar Intersecciones (estructura activa) ---");
+        System.out.println("1. Insertar interseccion");
+        System.out.println("2. Buscar interseccion por ID");
+        System.out.println("3. Eliminar interseccion por ID");
+        System.out.println("4. Ver recorrido InOrder");
+        System.out.println("5. Ver recorrido PreOrder");
+        System.out.println("6. Ver recorrido PostOrder");
+        System.out.println("7. Ver recorrido por niveles (BFS)");
+        System.out.print("Opcion: ");
+        int sub = leerInt();
+        switch (sub) {
+            case 1 -> {
+                System.out.print("ID: ");          int id  = leerInt();
+                System.out.print("Avenida: ");     String av = scanner.nextLine();
+                System.out.print("Congestion (0-10): "); int cong = leerInt();
+                System.out.print("Riesgo (0-10): ");     int rsk  = leerInt();
+                Interseccion inter = new Interseccion(id, av);
+                inter.setCongestionLevel(cong);
+                inter.setRiskLevel(rsk);
+                boolean ok = sistema.insertarInterseccion(inter);
+                System.out.println(ok ? "Interseccion insertada." : "Ya existe una interseccion con ese ID/criterio.");
+            }
+            case 2 -> {
+                System.out.print("ID a buscar: ");
+                int id = leerInt();
+                boolean found = sistema.buscarInterseccion(new Interseccion(id, ""));
+                System.out.println(found ? "Interseccion encontrada." : "No encontrada.");
+            }
+            case 3 -> {
+                System.out.print("ID a eliminar: ");
+                int id = leerInt();
+                boolean del = sistema.eliminarInterseccion(new Interseccion(id, ""));
+                System.out.println(del ? "Interseccion eliminada." : "No encontrada.");
+            }
+            case 4 -> { System.out.println("InOrder:"); sistema.mostrarInOrder(); System.out.println(); }
+            case 5 -> { System.out.println("PreOrder:"); sistema.mostrarPreOrder(); System.out.println(); }
+            case 6 -> { System.out.println("PostOrder:"); sistema.mostrarPostOrder(); System.out.println(); }
+            case 7 -> { System.out.println("BFS:"); sistema.mostrarPorNiveles(); System.out.println(); }
+            default -> System.out.println("Opcion invalida.");
+        }
+    }
 
     private int leerInt() {
         try {

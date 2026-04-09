@@ -52,23 +52,19 @@ public class AVL<T> implements org.example.interfaces.SearchTree<T> {
         root.height = 1 + Math.max(getHeight(root.left), getHeight(root.right));
         int balance = getBalance(root);
 
-        // Left heavy (LL case)
         if (balance < -1 && compare(value, root.left.value) < 0) {
             return rotateRight(root);
         }
 
-        // Left heavy (LR case)
         if (balance < -1 && compare(value, root.left.value) > 0) {
             root.left = rotateLeft(root.left);
             return rotateRight(root);
         }
 
-        // Right heavy (RR case)
         if (balance > 1 && compare(value, root.right.value) > 0) {
             return rotateLeft(root);
         }
 
-        // Right heavy (RL case)
         if (balance > 1 && compare(value, root.right.value) < 0) {
             root.right = rotateRight(root.right);
             return rotateLeft(root);
@@ -154,23 +150,19 @@ public class AVL<T> implements org.example.interfaces.SearchTree<T> {
         updateHeights(root);
         int balance = getBalance(root);
 
-        // Left heavy after delete (LL case)
         if (balance < -1 && getBalance(root.left) <= 0) {
             return rotateRight(root);
         }
 
-        // Left heavy after delete (LR case)
         if (balance < -1 && getBalance(root.left) > 0) {
             root.left = rotateLeft(root.left);
             return rotateRight(root);
         }
 
-        // Right heavy after delete (RR case)
         if (balance > 1 && getBalance(root.right) >= 0) {
             return rotateLeft(root);
         }
 
-        // Right heavy after delete (RL case)
         if (balance > 1 && getBalance(root.right) < 0) {
             root.right = rotateRight(root.right);
             return rotateLeft(root);
@@ -262,6 +254,10 @@ public class AVL<T> implements org.example.interfaces.SearchTree<T> {
         return this.size;
     }
 
+    public int getRootBalanceFactor() {
+        return getBalance(this.root);
+    }
+
     private int getBalance(Node<T> root) {
         if (root == null)
             return 0;
@@ -294,8 +290,9 @@ public class AVL<T> implements org.example.interfaces.SearchTree<T> {
     }
 
     public void getMetrics() {
-        System.out.println("Comparisons: " + comparisons);
-        System.out.println("Rotations: " + rotations);
+        System.out.println("Comparaciones: " + comparisons);
+        System.out.println("Rotaciones   : " + rotations);
+        System.out.println("Factor balance (raíz): " + getBalance(this.root));
     }
     protected static class Node<T> {
         protected T value;
